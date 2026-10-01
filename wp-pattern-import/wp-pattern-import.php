@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP Pattern Import
  * Description: Imports repeated HTML patterns from approved source pages into WordPress posts using saved scraping recipes.
- * Version: 0.13.0
+ * Version: 0.13.1
  * Requires at least: 7.0
  * Requires PHP: 7.4
  * Update URI: https://github.com/cchatterton/wp-pattern-import
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'WPI_VERSION', '0.13.0' );
+define( 'WPI_VERSION', '0.13.1' );
 define( 'WPI_PLUGIN_FILE', __FILE__ );
 define( 'WPI_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WPI_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
