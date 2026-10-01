@@ -12,20 +12,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action( WPI_CRON_HOOK, 'wpi_cron_run' );
 
 /**
- * Update daily schedule based on the recipe schedule value.
+ * Update import schedule based on the recipe schedule value.
  *
- * @param string $schedule manual|daily.
+ * @param string $schedule manual|hourly|daily.
  * @param string $schedule_time HH:MM site-local time.
  * @return void
  */
 function wpi_update_schedule( $schedule, $schedule_time = '02:00' ) {
-	if ( 'daily' !== $schedule ) {
+	if ( ! in_array( $schedule, array( 'hourly', 'daily' ), true ) ) {
 		wpi_clear_schedule();
 		return;
 	}
 
 	wpi_clear_schedule();
 	if ( ! wp_next_scheduled( WPI_CRON_HOOK ) ) {
+		if ( 'hourly' === $schedule ) {
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'hourly', WPI_CRON_HOOK );
+			return;
+		}
+
 		wp_schedule_event( wpi_next_daily_timestamp( $schedule_time ), 'daily', WPI_CRON_HOOK );
 	}
 }
@@ -54,7 +59,7 @@ function wpi_next_daily_timestamp( $schedule_time ) {
 }
 
 /**
- * Clear the scheduled daily import.
+ * Clear scheduled imports.
  *
  * @return void
  */

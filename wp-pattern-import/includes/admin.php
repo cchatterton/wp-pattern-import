@@ -200,6 +200,7 @@ function wpi_render_admin_page() {
 							<th scope="row"><?php echo esc_html__( 'Schedule', 'wp-pattern-import' ); ?></th>
 							<td>
 								<label><input type="radio" name="schedule" value="manual" <?php checked( $recipe['schedule'], 'manual' ); ?> /> <?php echo esc_html__( 'Manual only', 'wp-pattern-import' ); ?></label><br />
+								<label><input type="radio" name="schedule" value="hourly" <?php checked( $recipe['schedule'], 'hourly' ); ?> /> <?php echo esc_html__( 'Hourly', 'wp-pattern-import' ); ?></label><br />
 								<label><input type="radio" name="schedule" value="daily" <?php checked( $recipe['schedule'], 'daily' ); ?> /> <?php echo esc_html__( 'Daily', 'wp-pattern-import' ); ?></label>
 							</td>
 						</tr>
@@ -370,7 +371,7 @@ function wpi_handle_save_recipe() {
 	if ( ! wpi_is_valid_source_url( $recipe['url'] ) ) {
 		wpi_redirect_with_error( __( 'Please enter a valid HTTP or HTTPS source URL.', 'wp-pattern-import' ) );
 	}
-	if ( 'daily' === $recipe['schedule'] && ! wpi_recipe_has_unique_target( $recipe ) ) {
+	if ( wpi_schedule_requires_unique_target( $recipe['schedule'] ) && ! wpi_recipe_has_unique_target( $recipe ) ) {
 		wpi_redirect_with_error( __( 'Choose a mapped field for the unique target before saving a schedule.', 'wp-pattern-import' ) );
 	}
 
@@ -404,7 +405,7 @@ function wpi_handle_run_import() {
 	if ( ! wpi_is_valid_source_url( $posted_recipe['url'] ) ) {
 		wpi_redirect_with_error( __( 'Please enter a valid HTTP or HTTPS source URL.', 'wp-pattern-import' ) );
 	}
-	if ( 'daily' === $posted_recipe['schedule'] && ! wpi_recipe_has_unique_target( $posted_recipe ) ) {
+	if ( wpi_schedule_requires_unique_target( $posted_recipe['schedule'] ) && ! wpi_recipe_has_unique_target( $posted_recipe ) ) {
 		wpi_redirect_with_error( __( 'Choose a mapped field for the unique target before saving a schedule.', 'wp-pattern-import' ) );
 	}
 
@@ -434,7 +435,7 @@ function wpi_handle_test_import() {
 	if ( ! wpi_is_valid_source_url( $posted_recipe['url'] ) ) {
 		wpi_redirect_with_error( __( 'Please enter a valid HTTP or HTTPS source URL.', 'wp-pattern-import' ) );
 	}
-	if ( 'daily' === $posted_recipe['schedule'] && ! wpi_recipe_has_unique_target( $posted_recipe ) ) {
+	if ( wpi_schedule_requires_unique_target( $posted_recipe['schedule'] ) && ! wpi_recipe_has_unique_target( $posted_recipe ) ) {
 		wpi_redirect_with_error( __( 'Choose a mapped field for the unique target before saving a schedule.', 'wp-pattern-import' ) );
 	}
 
@@ -477,7 +478,10 @@ function wpi_sanitize_recipe( $data ) {
 		$post_type = 'post';
 	}
 
-	$schedule = isset( $data['schedule'] ) && 'daily' === $data['schedule'] ? 'daily' : 'manual';
+	$schedule = isset( $data['schedule'] ) ? sanitize_key( $data['schedule'] ) : 'manual';
+	if ( ! in_array( $schedule, array( 'manual', 'hourly', 'daily' ), true ) ) {
+		$schedule = 'manual';
+	}
 
 	$recipe = array(
 		'url'           => isset( $data['url'] ) ? esc_url_raw( trim( $data['url'] ), array( 'http', 'https' ) ) : '',
@@ -1576,6 +1580,16 @@ function wpi_sanitize_attr( $attr ) {
 function wpi_sanitize_schedule_time( $time ) {
 	$time = trim( (string) $time );
 	return preg_match( '/^([01]\d|2[0-3]):([0-5]\d)$/', $time ) ? $time : '02:00';
+}
+
+/**
+ * Check whether a schedule mode needs a unique target.
+ *
+ * @param string $schedule Schedule mode.
+ * @return bool
+ */
+function wpi_schedule_requires_unique_target( $schedule ) {
+	return in_array( $schedule, array( 'hourly', 'daily' ), true );
 }
 
 /**

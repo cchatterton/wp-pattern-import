@@ -4,7 +4,7 @@ Tags: import, scraping, patterns, posts
 Requires at least: 7.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 0.13.1
+Stable tag: 0.13.2
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,6 +17,11 @@ WP Pattern Import lets an administrator define scraping patterns for source URLs
 The plugin creates new posts only. It does not update existing posts or delete missing posts.
 
 == Changelog ==
+
+= 0.13.2 =
+
+* Add hourly scheduled imports alongside manual and daily schedules.
+* Require a mapped unique key before saving hourly or daily schedules.
 
 = 0.13.1 =
 
